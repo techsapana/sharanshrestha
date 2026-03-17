@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Gallery {
+  id     Int            @id @default(autoincrement())
+  title  String
+  images GalleryImage[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model GalleryImage {
+  id  Int    @id @default(autoincrement())
+  url String
+
+  gallery   Gallery @relation(fields: [galleryId], references: [id], onDelete: Cascade)
+  galleryId Int
+}
+
+model Blog {
+  id      Int    @id @default(autoincrement())
+  title   String
+  content String
+  image   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ResearchArticle {
+  id      Int      @id @default(autoincrement())
+  title   String
+  journal String?
+  year    Int?
+  doi     String?
+  tags    String[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OnlineClass {
+  id          Int    @id @default(autoincrement())
+  title       String
+  description String
+  duration    String
+  link        String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Resource {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?  @db.Text
+  fileUrl     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

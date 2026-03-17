@@ -1,0 +1,165 @@
+import prisma from "@/src/lib/prisma";
+import cloudinary from "@/src/services/cloudinary";
+import type { UploadApiResponse } from "cloudinary";
+import { NextRequest, NextResponse } from "next/server";
+
+const uploadToCloudinary = (buffer: Buffer): Promise<UploadApiResponse> =>
+  new Promise((resolve, reject) => {
+    const stream = cloudinary.uploader.upload_stream(
+      { folder: "galleries" },
+      (error, result) => {
+        if (error) return reject(error);
+        if (!result) return reject(new Error("Upload failed"));
+        resolve(result);
+      },
+    );
+    stream.end(buffer);
+  });
+
+/* =========================
+   GET ALL GALLERIES
+========================= */
+export async function GET() {
+  try {
+    const galleries = await prisma.gallery.findMany({
+      include: { images: true },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(galleries);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Failed to fetch galleries" },
+      { status: 500 },
+    );
+  }
+}
+
+/* =========================
+   CREATE GALLERY
+========================= */
+export async function POST(req: NextRequest) {
+  try {
+    const formData = await req.formData();
+    const galleryData = JSON.parse(formData.get("gallery") as string);
+
+    const files = formData.getAll("images") as File[];
+
+    const imageUrls: string[] = [];
+
+    for (const file of files) {
+      if (file instanceof File) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const upload = await uploadToCloudinary(buffer);
+        imageUrls.push(upload.secure_url);
+      }
+    }
+
+    const gallery = await prisma.gallery.create({
+      data: {
+        title: galleryData.title,
+        images: {
+          create: imageUrls.map((url) => ({ url })),
+        },
+      },
+      include: { images: true },
+    });
+
+    return NextResponse.json(gallery);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Failed to create gallery" },
+      { status: 500 },
+    );
+  }
+}
+
+/* =========================
+   UPDATE GALLERY
+========================= */
+export async function PUT(req: NextRequest) {
+  try {
+    const formData = await req.formData();
+    const galleryData = JSON.parse(formData.get("gallery") as string);
+
+    const files = formData.getAll("images") as File[];
+
+    const imageUrls: string[] = [];
+
+    // Upload new images if any
+    for (const file of files) {
+      if (file instanceof File && file.size > 0) {
+        const buffer = Buffer.from(await file.arrayBuffer());
+        const upload = await uploadToCloudinary(buffer);
+        imageUrls.push(upload.secure_url);
+      }
+    }
+
+    const galleryId = Number(galleryData.id);
+
+    // Update title
+    await prisma.gallery.update({
+      where: { id: galleryId },
+      data: { title: galleryData.title },
+    });
+
+    // Add new images if uploaded
+    if (imageUrls.length > 0) {
+      await prisma.galleryImage.createMany({
+        data: imageUrls.map((url) => ({
+          url,
+          galleryId,
+        })),
+      });
+    }
+
+    const updatedGallery = await prisma.gallery.findUnique({
+      where: { id: galleryId },
+      include: { images: true },
+    });
+
+    return NextResponse.json(updatedGallery);
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Failed to update gallery" },
+      { status: 500 },
+    );
+  }
+}
+
+/* =========================
+   DELETE GALLERY
+========================= */
+export async function DELETE(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const idParam = searchParams.get("id");
+
+    if (!idParam) {
+      return NextResponse.json(
+        { error: "Gallery ID required" },
+        { status: 400 },
+      );
+    }
+
+    const id = Number(idParam);
+
+    await prisma.gallery.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({
+      success: true,
+      message: "Gallery deleted",
+    });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json(
+      { error: "Failed to delete gallery" },
+      { status: 500 },
+    );
+  }
+}
