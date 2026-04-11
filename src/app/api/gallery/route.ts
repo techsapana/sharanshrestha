@@ -3,6 +3,8 @@ import cloudinary from "@/src/services/cloudinary";
 import type { UploadApiResponse } from "cloudinary";
 import { NextRequest, NextResponse } from "next/server";
 
+ const MAX_IMAGE_SIZE_BYTES = 50 * 1024 * 1024;
+
 const uploadToCloudinary = (buffer: Buffer): Promise<UploadApiResponse> =>
   new Promise((resolve, reject) => {
     const stream = cloudinary.uploader.upload_stream(
@@ -50,6 +52,12 @@ export async function POST(req: NextRequest) {
 
     for (const file of files) {
       if (file instanceof File) {
+        if (file.size > MAX_IMAGE_SIZE_BYTES) {
+          return NextResponse.json(
+            { error: "Image exceeds 50MB limit" },
+            { status: 413 },
+          );
+        }
         const buffer = Buffer.from(await file.arrayBuffer());
         const upload = await uploadToCloudinary(buffer);
         imageUrls.push(upload.secure_url);
@@ -91,6 +99,12 @@ export async function PUT(req: NextRequest) {
     // Upload new images if any
     for (const file of files) {
       if (file instanceof File && file.size > 0) {
+        if (file.size > MAX_IMAGE_SIZE_BYTES) {
+          return NextResponse.json(
+            { error: "Image exceeds 50MB limit" },
+            { status: 413 },
+          );
+        }
         const buffer = Buffer.from(await file.arrayBuffer());
         const upload = await uploadToCloudinary(buffer);
         imageUrls.push(upload.secure_url);
