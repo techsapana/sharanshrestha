@@ -1,5 +1,5 @@
-import AdminNavbar from "@/src/components/AdminNavbar";
-import "@/src/app/(public)/globals.css";
+import AdminNavbar from "@/components/AdminNavbar";
+import "@/app/(public)/globals.css";
 
 export const metadata = {
   title: "Admin Panel",

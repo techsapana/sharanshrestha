@@ -4,7 +4,7 @@ import { motion, useAnimationControls } from "framer-motion";
 import { useEffect, useState } from "react";
 
 import Image from "next/image";
-import Footer from "@/src/components/Footer";
+import Footer from "@/components/Footer";
 import { FaWhatsapp } from "react-icons/fa";
 import Link from "next/link";
 import {
@@ -14,7 +14,7 @@ import {
   fadeUpItem,
   staggerContainer,
   scrollingButton,
-} from "@/src/animations/animation";
+} from "@/animations/animation";
 
 export default function Home() {
   const controls = useAnimationControls();

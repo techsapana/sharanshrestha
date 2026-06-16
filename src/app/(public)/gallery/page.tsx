@@ -7,8 +7,8 @@ import {
   fadeUp,
   staggerContainer,
   fadeUpItem,
-} from "@/src/animations/animation";
-import Footer from "@/src/components/Footer";
+} from "@/animations/animation";
+import Footer from "@/components/Footer";
 
 interface GalleryImage {
   id: number;

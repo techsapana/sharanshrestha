@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 
-const RichTextEditor = dynamic(() => import("@/src/components/TipTap"), {
+const RichTextEditor = dynamic(() => import("@/components/TipTap"), {
   ssr: false,
 });
 

@@ -1,5 +1,5 @@
-import prisma from "@/src/lib/prisma";
-import cloudinary from "@/src/services/cloudinary";
+import prisma from "@/lib/prisma";
+import cloudinary from "@/services/cloudinary";
 import type { UploadApiResponse } from "cloudinary";
 import { NextRequest, NextResponse } from "next/server";
 
