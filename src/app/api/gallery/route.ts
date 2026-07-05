@@ -1,22 +1,26 @@
 import prisma from "@/lib/prisma";
-import cloudinary from "@/services/cloudinary";
-import type { UploadApiResponse } from "cloudinary";
 import { NextRequest, NextResponse } from "next/server";
+import { writeFile } from "fs/promises";
+import path from "path";
+import crypto from "crypto";
 
- const MAX_IMAGE_SIZE_BYTES = 50 * 1024 * 1024;
+const MAX_IMAGE_SIZE_BYTES = 50 * 1024 * 1024;
+const UPLOAD_DIR = "/var/www/sharanshrestha_media";
 
-const uploadToCloudinary = (buffer: Buffer): Promise<UploadApiResponse> =>
-  new Promise((resolve, reject) => {
-    const stream = cloudinary.uploader.upload_stream(
-      { folder: "galleries" },
-      (error, result) => {
-        if (error) return reject(error);
-        if (!result) return reject(new Error("Upload failed"));
-        resolve(result);
-      },
-    );
-    stream.end(buffer);
-  });
+// Utility function to securely save uploaded File to the local disk
+const saveFileToDisk = async (file: File): Promise<string> => {
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const extension = file.name.split(".").pop() || "png";
+  
+  // Generate a unique, sanitized filename to prevent path traversal & overwrites
+  const filename = `${crypto.randomUUID()}-${Date.now()}.${extension}`;
+  const filepath = path.join(UPLOAD_DIR, filename);
+
+  await writeFile(filepath, buffer);
+  
+  // Return the relative URL string mapped via Nginx
+  return `/uploads/${filename}`;
+};
 
 /* =========================
    GET ALL GALLERIES
@@ -58,9 +62,8 @@ export async function POST(req: NextRequest) {
             { status: 413 },
           );
         }
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const upload = await uploadToCloudinary(buffer);
-        imageUrls.push(upload.secure_url);
+        const uploadedUrl = await saveFileToDisk(file);
+        imageUrls.push(uploadedUrl);
       }
     }
 
@@ -105,9 +108,8 @@ export async function PUT(req: NextRequest) {
             { status: 413 },
           );
         }
-        const buffer = Buffer.from(await file.arrayBuffer());
-        const upload = await uploadToCloudinary(buffer);
-        imageUrls.push(upload.secure_url);
+        const uploadedUrl = await saveFileToDisk(file);
+        imageUrls.push(uploadedUrl);
       }
     }
 
