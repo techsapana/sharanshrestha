@@ -201,6 +201,7 @@ export default function AdminBlogForm() {
                     height={100}
                     width={160}
                     className="w-16 h-16 object-cover rounded"
+                    unoptimized
                   />
                 ) : (
                   <p className="text-sm text-gray-500">No Image</p>

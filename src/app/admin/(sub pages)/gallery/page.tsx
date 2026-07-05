@@ -210,6 +210,7 @@ export default function AdminGalleryForm() {
                         width={80}
                         height={80}
                         className="w-16 h-16 object-cover rounded"
+                        unoptimized
                       />
                     ))}
                   </div>

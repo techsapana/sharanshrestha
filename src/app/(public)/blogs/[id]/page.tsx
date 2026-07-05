@@ -103,6 +103,7 @@ export default function BlogPage() {
                 sizes="(min-width: 1024px) 1024px, (min-width: 640px) 100vw, 100vw"
                 className="object-cover"
                 priority
+                unoptimized
               />
             </div>
           </div>

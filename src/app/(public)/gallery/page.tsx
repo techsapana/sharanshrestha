@@ -231,6 +231,7 @@ export default function GalleryPage() {
                               fill
                               className="object-cover transition-transform duration-500 group-hover:scale-110"
                               sizes="(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1024px) 25vw, 20vw"
+                              unoptimized
                             />
                             <div className="absolute inset-0 bg-linear-to-t from-black/70 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                               <div className="absolute bottom-2 md:bottom-4 left-2 md:left-4 right-2 md:right-4">
@@ -302,6 +303,7 @@ export default function GalleryPage() {
                     className="object-contain drop-shadow-2xl"
                     sizes="100vw"
                     priority
+                    unoptimized
                   />
                 </div>
                 {selectedGalleryTitle && (
